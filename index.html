@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Recorrências</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://w3.org viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💳</text></svg>">
     <meta name="theme-color" content="#4A90E2">
     <style>
         body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; background: #f5f5f5; color: #333; }
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         input, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
         button { background: #4A90E2; color: white; border: none; font-weight: bold; cursor: pointer; }
+        #btn-instalar { background: #28a745; display: none; margin-bottom: 15px; }
         
-        /* Painel de Resumo */
         .resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .resumo-item { padding: 10px; border-radius: 6px; text-align: center; font-size: 0.9em; }
         .total { background: #ebf3fc; color: #1e4e8c; grid-column: span 2; font-weight: bold; font-size: 1.1em; }
         .pago { background: #e6f4ea; color: #137333; font-weight: bold; }
         .pendente { background: #fce8e6; color: #c5221f; font-weight: bold; }
         
-        /* Lista de Itens */
         .item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 12px 0; }
         .status-badge { font-size: 0.8em; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
         .badge-pago { background: #e6f4ea; color: #137333; }
@@ -29,9 +29,10 @@
 </head>
 <body>
 
+    <button id="btn-instalar">📲 Instalar Aplicativo</button>
+
     <h2>💳 Gestor de Cartão</h2>
     
-    <!-- Painel de Cálculos Automáticos -->
     <div class="card">
         <h3>Resumo do Mês</h3>
         <div class="resumo-grid">
@@ -41,7 +42,6 @@
         </div>
     </div>
     
-    <!-- Formulário -->
     <div class="card">
         <h3>Novo Lançamento</h3>
         <form id="form-recorrencia">
@@ -52,19 +52,37 @@
         </form>
     </div>
 
-    <!-- Listagem -->
     <div class="card">
         <h3>Minhas Assinaturas</h3>
         <div id="lista-recorrencias"></div>
     </div>
 
     <script>
-        // Registro do Service Worker
+        // Captura o evento de instalação do navegador
+        let deparaInstalacao;
+        const botaoInstalar = document.getElementById('btn-instalar');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deparaInstalacao = e;
+            botaoInstalar.style.display = 'block'; // Mostra o botão se for instalável
+        });
+
+        botaoInstalar.addEventListener('click', async () => {
+            if (deparaInstalacao) {
+                deparaInstalacao.prompt();
+                const { outcome } = await deparaInstalacao.userChoice;
+                if (outcome === 'accepted') {
+                    botaoInstalar.style.style.display = 'none';
+                }
+                deparaInstalacao = null;
+            }
+        });
+
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').then(() => console.log('SW ativo'));
         }
 
-        // Configuração do IndexedDB com Persistência
         let db;
         const request = indexedDB.open('GestorRecorrenciasDB', 1);
 
@@ -75,17 +93,10 @@
 
         request.onsuccess = (e) => {
             db = e.target.result;
-            solicitarPersistencia();
+            if (navigator.storage && navigator.storage.persist) { navigator.storage.persist(); }
             listarERecalc();
         };
 
-        async function solicitarPersistencia() {
-            if (navigator.storage && navigator.storage.persist) {
-                await navigator.storage.persist();
-            }
-        }
-
-        // Cadastro de nova recorrência
         document.getElementById('form-recorrencia').addEventListener('submit', (e) => {
             e.preventDefault();
             const novaAssinatura = {
@@ -102,7 +113,6 @@
             };
         });
 
-        // Motor de listagem e cálculo automático
         function listarERecalc() {
             const lista = document.getElementById('lista-recorrencias');
             lista.innerHTML = '';
@@ -110,8 +120,6 @@
             let totalGeral = 0;
             let totalPago = 0;
             let totalPendente = 0;
-
-            // Obtém o dia atual do dispositivo
             const hoje = new Date().getDate();
 
             const tx = db.transaction('assinaturas', 'readonly');
@@ -119,17 +127,10 @@
                 const cursor = e.target.result;
                 if (cursor) {
                     const item = cursor.value;
-                    
-                    // REGRA DE DATA: Se HOJE for MAIOR ou IGUAL ao VENCIMENTO, entra como PAGO.
-                    // Exemplo: Se hoje é 10 e vencimento é 10, dá TRUE (Pago).
                     const foiPago = hoje >= item.vencimento;
 
                     totalGeral += item.valor;
-                    if (foiPago) {
-                        totalPago += item.valor;
-                    } else {
-                        totalPendente += item.valor;
-                    }
+                    if (foiPago) { totalPago += item.valor; } else { totalPendente += item.valor; }
 
                     const statusTexto = foiPago ? 'Pago' : 'Pendente';
                     const statusClasse = foiPago ? 'badge-pago' : 'badge-pendente';
@@ -147,14 +148,10 @@
                     `;
                     cursor.continue();
                 } else {
-                    // Atualiza o painel de resumo com os valores finais calculados
                     document.getElementById('resumo-total').innerText = `Total: R$ ${totalGeral.toFixed(2)}`;
                     document.getElementById('resumo-pago').innerText = `Já Pago: R$ ${totalPago.toFixed(2)}`;
                     document.getElementById('resumo-pendente').innerText = `Falta Pagar: R$ ${totalPendente.toFixed(2)}`;
-
-                    if (lista.innerHTML === '') {
-                        lista.innerHTML = '<p>Nenhuma recorrência cadastrada.</p>';
-                    }
+                    if (lista.innerHTML === '') { lista.innerHTML = '<p>Nenhuma recorrência cadastrada.</p>'; }
                 }
             };
         }
