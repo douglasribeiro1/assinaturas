@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle decorative ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+
+  <!-- Back Card (Tilted) -->
+  <rect x="136" y="140" width="240" height="150" rx="20" fill="url(#accentGrad)" opacity="0.4" transform="rotate(-10 256 215)"/>
+
+  <!-- Main Card -->
+  <g filter="url(#cardShadow)">
+    <rect x="116" y="166" width="280" height="175" rx="22" fill="url(#cardGrad)"/>
+    <!-- Card Chip / Shine -->
+    <rect x="150" y="200" width="46" height="34" rx="8" fill="#fbbf24" opacity="0.9"/>
+    <!-- Card Lines -->
+    <rect x="150" y="290" width="90" height="12" rx="6" fill="rgba(255,255,255,0.7)"/>
+    <rect x="310" y="286" width="50" height="20" rx="6" fill="rgba(255,255,255,0.2)"/>
+  </g>
+
+  <!-- Recurring cycle badge (Bottom Right) -->
+  <g transform="translate(300, 270)">
+    <circle cx="56" cy="56" r="48" fill="#0f172a" stroke="#1e293b" stroke-width="6"/>
+    <circle cx="56" cy="56" r="42" fill="#10b981"/>
+    <!-- Recurring arrows / checkmark -->
+    <path d="M42 56l10 10 20 -20" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

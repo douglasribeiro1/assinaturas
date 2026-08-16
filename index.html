@@ -1,300 +1,225 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minhas Assinaturas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="manifest" id="manifest-link">
-    <link rel="icon" id="favicon-link" type="image/svg+xml">
-    <meta name="theme-color" content="#2563eb">
-    
-    <style>
-        /* Melhorias visuais para dispositivos móveis */
-        body {
-            -webkit-tap-highlight-color: transparent;
-            background-color: #f3f4f6;
-        }
-        /* Ocultar setas do input number */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Minhas Assinaturas</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#090d16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Assinaturas">
+  <meta name="description" content="Gestão inteligente e simples de assinaturas e pagamentos recorrentes.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="text-gray-800 antialiased h-screen flex justify-center">
+<body>
 
-    <div class="w-full max-w-md bg-white h-full flex flex-col shadow-xl sm:h-auto sm:my-8 sm:rounded-2xl sm:overflow-hidden relative">
-        
-        <!-- Header -->
-        <header class="bg-blue-600 text-white p-6 shadow-md z-10">
-            <div class="flex items-center justify-between mb-4">
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-                    Assinaturas
-                </h1>
-                <button onclick="backupData()" class="p-2 bg-blue-700 hover:bg-blue-800 rounded-full transition" title="Backup JSON">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                </button>
-            </div>
-            
-            <div class="bg-blue-700/50 p-4 rounded-xl flex flex-col gap-3">
-                <div>
-                    <p class="text-blue-100 text-sm font-medium mb-1">Total Mensal</p>
-                    <p class="text-3xl font-bold" id="total-value">R$ 0,00</p>
-                </div>
-                <div class="flex gap-3">
-                    <div class="flex-1 bg-white/10 p-2.5 rounded-lg border border-white/5">
-                        <p class="text-blue-200 text-xs font-medium mb-0.5">Já Pago</p>
-                        <p class="text-lg font-bold text-green-300" id="total-paid">R$ 0,00</p>
-                    </div>
-                    <div class="flex-1 bg-white/10 p-2.5 rounded-lg border border-white/5">
-                        <p class="text-blue-200 text-xs font-medium mb-0.5">Pendente</p>
-                        <p class="text-lg font-bold text-amber-300" id="total-pending">R$ 0,00</p>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Formulário de Adição -->
-        <div class="p-5 border-b border-gray-100 bg-gray-50 z-10">
-            <form id="add-form" class="flex flex-col gap-3">
-                <div>
-                    <input type="text" id="input-name" required placeholder="Nome (ex: Netflix)" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                </div>
-                <div class="flex gap-3">
-                    <div class="relative w-1/2">
-                        <span class="absolute left-3 top-2.5 text-gray-500 font-medium">R$</span>
-                        <input type="number" id="input-value" required step="0.01" min="0" placeholder="0,00" class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                    </div>
-                    <div class="w-1/2">
-                        <input type="number" id="input-day" required min="1" max="31" placeholder="Dia do Venc." class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-                    Adicionar Conta
-                </button>
-            </form>
-        </div>
-
-        <!-- Lista de Assinaturas -->
-        <div class="flex-1 overflow-y-auto p-5 bg-white" id="list-container">
-            <!-- Os itens serão injetados aqui pelo JavaScript -->
-            <p class="text-center text-gray-400 mt-10">Carregando dados...</p>
-        </div>
-
+  <div class="app-shell">
+    
+    <!-- PWA Install Banner -->
+    <div id="install-banner" class="install-banner">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        <span class="install-text">Instalar app no seu celular</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button id="btn-install-pwa" class="install-btn-action">Instalar</button>
+        <button id="btn-close-install" class="install-btn-close">✕</button>
+      </div>
     </div>
 
-    <script>
-        // --- 1. CONFIGURAÇÃO DO PWA (Manifest e Icon gerados dinamicamente) ---
-        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#2563eb"/><path d="M152 264 l72 72 l152 -152" stroke="#ffffff" stroke-width="48" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        const base64Icon = "data:image/svg+xml;base64," + btoa(svgIcon);
-        
-        document.getElementById('favicon-link').href = base64Icon;
+    <!-- Header -->
+    <header class="top-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Assinaturas</h1>
+          <div class="brand-subtitle" id="current-month-display">Mês Atual</div>
+        </div>
+      </div>
 
-        const manifest = {
-            name: "Gerenciador de Assinaturas",
-            short_name: "Assinaturas",
-            start_url: location.href,
-            display: "standalone",
-            background_color: "#f3f4f6",
-            theme_color: "#2563eb",
-            icons: [{
-                src: base64Icon,
-                sizes: "512x512",
-                type: "image/svg+xml",
-                purpose: "any maskable"
-            }]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-        document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+      <div class="header-actions">
+        <button onclick="openBackupModal()" class="icon-btn" title="Backup & Restauração" aria-label="Backup">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        </button>
+      </div>
+    </header>
 
-        // Service Worker vazio apenas para habilitar a instalação PWA
-        const swCode = `
-            self.addEventListener('install', (e) => self.skipWaiting());
-            self.addEventListener('activate', (e) => self.clients.claim());
-            self.addEventListener('fetch', (e) => {});
-        `;
-        const swBlob = new Blob([swCode], {type: 'application/javascript'});
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(console.error);
-        }
+    <!-- Resumo Compacto -->
+    <section class="summary-section">
+      <div class="summary-card">
+        <div class="summary-top">
+          <div>
+            <div class="summary-label">Total do Mês</div>
+            <div class="summary-main-val" id="total-value">R$ 0,00</div>
+          </div>
+          <div class="summary-count-badge" id="subscriptions-count">0 contas</div>
+        </div>
 
-        // --- 2. LÓGICA DO INDEXEDDB ---
-        let db;
-        const dbName = "AssinaturasPWA_DB";
-        
-        const initDB = () => {
-            const request = indexedDB.open(dbName, 1);
+        <div class="summary-breakdown">
+          <div class="breakdown-item">
+            <div class="breakdown-label">
+              <span class="status-dot paid"></span>
+              Já Pago
+            </div>
+            <div class="breakdown-val paid" id="total-paid">R$ 0,00</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">
+              <span class="status-dot pending"></span>
+              A Pagar
+            </div>
+            <div class="breakdown-val pending" id="total-pending">R$ 0,00</div>
+          </div>
+        </div>
 
-            request.onupgradeneeded = (event) => {
-                db = event.target.result;
-                if (!db.objectStoreNames.contains("contas")) {
-                    db.createObjectStore("contas", { keyPath: "id", autoIncrement: true });
-                }
-            };
+        <div class="progress-wrap" title="Progresso de pagamentos do mês">
+          <div class="progress-bar-fill" id="month-progress-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+    </section>
 
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                loadData();
-            };
+    <!-- Barra de Controles (Busca e Filtros) -->
+    <div class="controls-bar">
+      <div class="search-box">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar assinatura..." oninput="handleSearch(this.value)">
+      </div>
+      <div class="filter-pills">
+        <button class="pill-btn active" data-filter="all" onclick="setFilter('all')">Todas</button>
+        <button class="pill-btn" data-filter="pending" onclick="setFilter('pending')">Pendentes</button>
+        <button class="pill-btn" data-filter="paid" onclick="setFilter('paid')">Pagas</button>
+      </div>
+    </div>
 
-            request.onerror = (event) => {
-                console.error("Erro no IndexedDB:", event.target.error);
-                document.getElementById('list-container').innerHTML = '<p class="text-red-500 text-center mt-10">Erro ao acessar o banco de dados.</p>';
-            };
-        };
+    <!-- Lista de Assinaturas (Destaque Principal) -->
+    <main class="list-section" id="list-container" role="list">
+      <div class="empty-state">
+        <div class="empty-icon-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+        </div>
+        <div class="empty-title">Carregando dados...</div>
+      </div>
+    </main>
 
-        // --- 3. LÓGICA DA APLICAÇÃO ---
-        const formatCurrency = (value) => {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-        };
+    <!-- Botão de Ação Flutuante (FAB) -->
+    <button class="fab-btn" onclick="openFormModal()" aria-label="Adicionar Assinatura">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+      <span>Nova Conta</span>
+    </button>
 
-        const loadData = () => {
-            const transaction = db.transaction(["contas"], "readonly");
-            const store = transaction.objectStore("contas");
-            const request = store.getAll();
+    <!-- Modal / Bottom Sheet de Cadastro / Edição -->
+    <div id="form-modal" class="modal-backdrop" onclick="handleBackdropClick(event, 'form-modal')">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2 class="sheet-title" id="form-modal-title">Nova Assinatura</h2>
+          <button class="icon-btn" onclick="closeFormModal()" aria-label="Fechar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+          </button>
+        </div>
 
-            request.onsuccess = () => {
-                renderList(request.result);
-            };
-        };
+        <form id="account-form" onsubmit="handleFormSubmit(event)">
+          <input type="hidden" id="edit-id" value="">
 
-        const renderList = (contas) => {
-            const container = document.getElementById('list-container');
-            const currentDay = new Date().getDate();
-            
-            container.innerHTML = '';
-            
-            if (contas.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center mt-10">
-                        <div class="bg-gray-100 inline-block p-4 rounded-full mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" class="text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                        </div>
-                        <p class="text-gray-500">Nenhuma assinatura cadastrada.</p>
-                    </div>`;
-                document.getElementById('total-value').innerText = "R$ 0,00";
-                document.getElementById('total-paid').innerText = "R$ 0,00";
-                document.getElementById('total-pending').innerText = "R$ 0,00";
-                return;
-            }
+          <div class="form-group">
+            <label class="form-label" for="input-name">Nome do Serviço</label>
+            <input type="text" id="input-name" class="form-input" required placeholder="ex: Netflix, Spotify, ChatGPT" autocomplete="off">
+            <!-- Sugestões Rápidas -->
+            <div class="suggestions-list">
+              <span class="suggestion-chip" onclick="quickFill('Netflix', 44.90, 10)">Netflix</span>
+              <span class="suggestion-chip" onclick="quickFill('Spotify', 21.90, 15)">Spotify</span>
+              <span class="suggestion-chip" onclick="quickFill('ChatGPT Plus', 115.00, 5)">ChatGPT</span>
+              <span class="suggestion-chip" onclick="quickFill('Amazon Prime', 19.90, 12)">Prime</span>
+              <span class="suggestion-chip" onclick="quickFill('YouTube Premium', 24.90, 8)">YouTube</span>
+              <span class="suggestion-chip" onclick="quickFill('Academia', 120.00, 10)">Academia</span>
+              <span class="suggestion-chip" onclick="quickFill('Internet', 119.90, 20)">Internet</span>
+            </div>
+          </div>
 
-            // Ordenar por dia
-            contas.sort((a, b) => a.day - b.day);
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="input-value">Valor Mensal</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">R$</span>
+                <input type="number" id="input-value" class="form-input" required step="0.01" min="0.01" placeholder="0,00">
+              </div>
+            </div>
 
-            let total = 0;
-            let totalPaid = 0;
-            let totalPending = 0;
+            <div class="form-group">
+              <label class="form-label" for="input-day">Dia do Vencimento</label>
+              <input type="number" id="input-day" class="form-input" required min="1" max="31" placeholder="Ex: 10">
+            </div>
+          </div>
 
-            contas.forEach(conta => {
-                total += conta.value;
-                
-                const isPaid = currentDay >= conta.day;
-                
-                if (isPaid) {
-                    totalPaid += conta.value;
-                } else {
-                    totalPending += conta.value;
-                }
+          <button type="submit" class="btn-submit" id="btn-save-account">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span id="btn-save-text">Salvar Assinatura</span>
+          </button>
+        </form>
+      </div>
+    </div>
 
-                const statusColor = isPaid ? 'bg-green-100 text-green-700 border-green-200' : 'bg-amber-100 text-amber-700 border-amber-200';
-                const statusText = isPaid ? 'Pago' : 'Pendente';
+    <!-- Modal de Backup e Restauração -->
+    <div id="backup-modal" class="modal-backdrop" onclick="handleBackdropClick(event, 'backup-modal')">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2 class="sheet-title">Backup & Segurança</h2>
+          <button class="icon-btn" onclick="closeBackupModal()" aria-label="Fechar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+          </button>
+        </div>
 
-                const item = document.createElement('div');
-                item.className = "flex items-center justify-between p-4 mb-3 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition group";
-                
-                item.innerHTML = `
-                    <div class="flex-1">
-                        <h3 class="font-bold text-gray-800 text-lg">${conta.name}</h3>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">Dia ${conta.day}</span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${statusColor}">${statusText}</span>
-                        </div>
-                    </div>
-                    <div class="text-right flex flex-col items-end">
-                        <span class="font-bold text-gray-900">${formatCurrency(conta.value)}</span>
-                        <button onclick="deleteData(${conta.id})" class="mt-2 text-red-400 hover:text-red-600 p-1 rounded-md transition" title="Excluir">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
+        <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.4;">
+          Seus dados ficam 100% salvos no armazenamento local protegido deste dispositivo (IndexedDB). Você pode exportar uma cópia de segurança a qualquer momento.
+        </p>
 
-            document.getElementById('total-value').innerText = formatCurrency(total);
-            document.getElementById('total-paid').innerText = formatCurrency(totalPaid);
-            document.getElementById('total-pending').innerText = formatCurrency(totalPending);
-        };
+        <div class="backup-options">
+          <button class="backup-btn" onclick="exportBackupData()">
+            <div class="backup-btn-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            </div>
+            <div class="backup-btn-text">
+              <h4>Exportar Backup JSON</h4>
+              <p>Baixe um arquivo com todas as suas assinaturas</p>
+            </div>
+          </button>
 
-        const addData = (event) => {
-            event.preventDefault();
-            const name = document.getElementById('input-name').value;
-            const value = parseFloat(document.getElementById('input-value').value);
-            const day = parseInt(document.getElementById('input-day').value);
+          <label class="backup-btn" style="margin-bottom:0; cursor:pointer;">
+            <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importBackupData(event)">
+            <div class="backup-btn-icon" style="color:var(--accent-green); background:var(--accent-green-bg);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            </div>
+            <div class="backup-btn-text">
+              <h4>Importar Backup JSON</h4>
+              <p>Restaure suas assinaturas a partir de um arquivo</p>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
 
-            if (!name || isNaN(value) || isNaN(day) || day < 1 || day > 31) {
-                alert("Por favor, preencha os campos corretamente.");
-                return;
-            }
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+      <svg id="toast-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="toast-message">Operação realizada</span>
+    </div>
 
-            const transaction = db.transaction(["contas"], "readwrite");
-            const store = transaction.objectStore("contas");
-            
-            const request = store.add({ name, value, day });
+  </div>
 
-            request.onsuccess = () => {
-                document.getElementById('add-form').reset();
-                loadData();
-            };
-        };
-
-        const deleteData = (id) => {
-            if(confirm("Tem certeza que deseja remover esta assinatura?")) {
-                const transaction = db.transaction(["contas"], "readwrite");
-                const store = transaction.objectStore("contas");
-                const request = store.delete(id);
-
-                request.onsuccess = () => {
-                    loadData();
-                };
-            }
-        };
-
-        const backupData = () => {
-            const transaction = db.transaction(["contas"], "readonly");
-            const store = transaction.objectStore("contas");
-            const request = store.getAll();
-
-            request.onsuccess = () => {
-                const data = request.result;
-                if(data.length === 0) {
-                    alert("Não há dados para exportar.");
-                    return;
-                }
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `assinaturas_backup_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            };
-        };
-
-        // --- 4. INICIALIZAÇÃO ---
-        document.getElementById('add-form').addEventListener('submit', addData);
-        window.addEventListener('load', initDB);
-
-    </script>
+  <script src="app.js"></script>
 </body>
 </html>
