@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
@@ -25,8 +28,7 @@ export default defineConfig({
           { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      // Precache the app shell only; Supabase calls are never cached by the SW.
-      workbox: { globPatterns: ['**/*.{js,css,html,png,svg,webmanifest}'], navigateFallback: '/index.html' },
+      injectManifest: { globPatterns: ['**/*.{js,css,html,png,svg,webmanifest}'] },
     }),
   ],
   test: { environment: 'node' },
