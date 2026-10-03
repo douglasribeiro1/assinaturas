@@ -2,22 +2,17 @@
 import { computed, ref } from 'vue'
 import { summarizeMonth } from './engine/occurrences'
 import { todayISO } from './engine/date'
-import type { Subscription } from './engine/types'
+import { useSubscriptions } from './data/store'
 import { formatMoney } from './format'
 
-// Placeholder data until the Dexie layer lands (step 3).
-const subs: Subscription[] = [
-  { id: '1', name: 'Streaming', amountCents: 3990, currency: 'BRL', cycle: 'monthly', cycleInterval: 1, anchorDate: '2025-01-05', status: 'active' },
-  { id: '2', name: 'Música', amountCents: 2190, currency: 'BRL', cycle: 'monthly', cycleInterval: 1, anchorDate: '2025-01-28', status: 'active' },
-  { id: '3', name: 'Cloud', amountCents: 999, currency: 'USD', cycle: 'monthly', cycleInterval: 1, anchorDate: '2025-01-31', status: 'active' },
-]
-const names = Object.fromEntries(subs.map((s) => [s.id, s.name]))
+const store = useSubscriptions()
+const names = computed(() => Object.fromEntries(store.items.map((s) => [s.id, s.name])))
 
 const today = todayISO()
 const [ty, tm] = today.split('-').map(Number)
 const cursor = ref({ year: ty, month: tm })
 
-const summary = computed(() => summarizeMonth(subs, cursor.value.year, cursor.value.month, today))
+const summary = computed(() => summarizeMonth(store.items, cursor.value.year, cursor.value.month, today))
 
 function shift(delta: number) {
   const idx = cursor.value.year * 12 + cursor.value.month - 1 + delta
